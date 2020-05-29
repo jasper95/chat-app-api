@@ -14,6 +14,7 @@ import { UserRole } from 'utils/decorators/RouteAccessRoles'
 import { SwaggerParams } from 'utils/decorators/Routes'
 export * from './generated/models'
 export * from './generated/validators'
+import SocketIO from 'socket.io'
 
 export type VersioningOptions = {
   prefix?: string
@@ -82,6 +83,7 @@ export interface ServiceLocator {
     Model?: ModelService
     s3: S3Client
     azure: BlobService
+    io?: SocketIO
   }
   registerService(name: string, service: object): void
   get(name: 'DB'): QueryWrapper
@@ -91,6 +93,7 @@ export interface ServiceLocator {
   get(name: 'logger'): Logger
   get(name: 'Model'): ModelService
   get(name: 's3'): S3Client
+  get(name: 'io'): SocketIO
 }
 
 export interface ModelService {
@@ -115,7 +118,7 @@ export interface TableJsonSchema {
 }
 
 export interface Column {
-  type: 'string' | 'jsonb' | 'boolean' | 'uuid' | 'datetime' | 'integer' | 'decimal' | 'text' | 'timestamp'
+  type: 'string' | 'jsonb' | 'json' | 'boolean' | 'uuid' | 'datetime' | 'integer' | 'decimal' | 'text' | 'timestamp'
   column_name: string
   enum?: string[] | number[]
   required?: boolean

@@ -27,9 +27,9 @@ export default class BaseController extends AppService {
       ...other_params
     } = params
     const table_name = node.replace(/-/g, '_')
-    const filters = { ...other_params, ...this.Model.base.getRoleListFilter(table_name, user) }
-    const filtered_fields = this.Model.base.getAllowedFields(table_name, user, fields)
-    return this.DB.filter(table_name, filters, { fields: filtered_fields, sort, pagination: { page, size }, search })
+    // const filters = { ...other_params, ...this.Model.base.getRoleListFilter(table_name, user) }
+    // const filtered_fields = this.Model.base.getAllowedFields(table_name, user, fields)
+    return this.DB.filter(table_name, other_params, { fields, sort, pagination: { page, size }, search })
   }
 
   @Get('/:id', { parameters: GET_NODE_DETAILS_PARAMS, response_schema: NODE_SCHEMA })

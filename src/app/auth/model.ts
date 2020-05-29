@@ -7,7 +7,10 @@ class AuthModel extends AppService {
   async authenticateUser(user: User) {
     const session = await this.DB.insert<AuthSession>('auth_session', { user_id: user.id, device_type: 'Web' })
     return this.generateToken({
-      payload: session,
+      payload: {
+        ...session,
+        username: user.username,
+      },
       insert_db: false,
     })
   }
@@ -29,6 +32,7 @@ class AuthModel extends AppService {
           : null,
       })
       payload.id = result.id
+      console.log('payload: ', payload)
     }
     const token = jwt.sign(
       {

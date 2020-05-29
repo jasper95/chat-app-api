@@ -54,27 +54,33 @@ export default class UserController extends AppService {
   @Post('/login', { schema: LoginValidator, summary: 'Login to authorize requests' })
   @Validator(LoginValidator)
   async login({ params }: Request<LoginSchema>, res: Response) {
-    const { email, password } = params
-    const filter = (query: QueryBuilder) => query.where({ email })
-    const [user] = await this.DB.filter<User>('user', filter)
+    const { username, password } = params
+    const filter = (query: QueryBuilder) => query.where({ username })
+    let [user] = await this.DB.filter<User>('user', filter)
     if (!user) {
-      throw new BadRequestError('Invalid username or password')
-    }
-    const { id } = user
-    const [{ password: hash_password }] = await this.DB.filter<UserAuth>('user_auth', { user_id: id })
-    const match = await new Promise((resolve, reject) => {
-      bcrypt.compare(password, hash_password, (err, res) => {
-        if (err) {
-          reject(err)
-        }
-        resolve(res)
+      user = await this.DB.insert('user', {
+        username,
       })
-    })
-    if (!match) {
-      throw new BadRequestError('Invalid username or password')
+      const salt = await generateSalt()
+      const hash_password = await generateHash(password, salt)
+      await this.DB.insert('user_auth', { user_id: user.id, password: hash_password })
+    } else {
+      const { id } = user
+      const [{ password: hash_password }] = await this.DB.filter<UserAuth>('user_auth', { user_id: id })
+      const match = await new Promise((resolve, reject) => {
+        bcrypt.compare(password, hash_password, (err, res) => {
+          if (err) {
+            reject(err)
+          }
+          resolve(res)
+        })
+      })
+      if (!match) {
+        throw new BadRequestError('Invalid username or password')
+      }
     }
     const token = await this.Model.auth.authenticateUser(user)
-    await this.DB.updateById('user', { id: user.id, last_login_date: new Date().toISOString() })
+    // await this.DB.updateById('user', { id: user.id, last_login_date: new Date().toISOString() })
     res.setCookie('access_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

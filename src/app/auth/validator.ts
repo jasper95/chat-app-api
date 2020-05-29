@@ -3,9 +3,9 @@ import { JSONSchema7 } from 'json-schema'
 export const LoginValidator: JSONSchema7 = {
   type: 'object',
   title: 'LoginSchema',
-  required: ['email', 'password'],
+  required: ['username', 'password'],
   properties: {
-    email: {
+    username: {
       type: 'string',
     },
     password: {

@@ -24,7 +24,8 @@ export default async function migrateMain() {
 async function dropViews() {
   const query_wrapper = serviceLocator.get('DB')
   const knex = serviceLocator.get('knex')
-  const current_views = await query_wrapper.listViews()
+  const current_views = await query_wrapper.listViews(schema.db_name)
+  console.log('current_views: ', current_views)
   await Promise.mapSeries(current_views, async e => {
     logger.info('Drop View  [name: %s]', e.name)
     return knex.raw(`drop view if exists ${e.name} CASCADE`)

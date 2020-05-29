@@ -1,6 +1,6 @@
 export type UserRole = 'Admin'
-export const USER_ROLES: UserRole[] = ['Admin']
-export const ADMIN_ROLES: UserRole[] = ['Admin']
+export const USER_ROLES: UserRole[] = []
+export const ADMIN_ROLES: UserRole[] = []
 export type ControllerRouteAccessRoles = {
   [key: string]: UserRole[]
 }

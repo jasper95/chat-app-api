@@ -21,6 +21,7 @@ import {
 import Knex from 'knex'
 import { BadRequestError } from 'restify-errors'
 import pg from 'pg'
+import uuid from 'uuid/v4'
 pg.types.setTypeParser(20, 'text', parseInt)
 
 class QueryWrapper {
@@ -46,22 +47,41 @@ class QueryWrapper {
 
   _listTables() {
     return this.knex
-      .raw("SELECT * FROM pg_catalog.pg_tables WHERE schemaname='public'")
-      .then(res => res.rows) as Promise<[{ tablename: string }]>
+      .raw(
+        `SELECT table_name as tablename FROM information_schema.tables WHERE table_schema = '${this.knex.client.database()}'`,
+      )
+      .then(res => res[0]) as Promise<[{ tablename: string }]>
   }
 
   _listIndices(table: string) {
-    return this.knex.raw(`select * from pg_indexes where tablename = '${table}'`).then(res => res.rows) as Promise<
-      [{ indexname: string }]
-    >
+    return this.knex
+      .raw(
+        `SELECT
+          index_name as indexname
+        FROM
+            INFORMATION_SCHEMA.STATISTICS
+        where
+          table_schema = '${this.knex.client.database()}' and table_name = '${table}'
+          and index_name != 'PRIMARY'  
+        ;
+    `,
+      )
+      .then(rows => rows[0]) as Promise<[{ indexname: string }]>
   }
 
   _listForeignKeys(table: string) {
     return this.knex
       .raw(
-        `select * from information_schema.table_constraints where table_name = '${table}' AND constraint_type = 'FOREIGN KEY'`,
+        `SELECT 
+          *
+        FROM
+          INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+        WHERE
+          REFERENCED_TABLE_SCHEMA = '${this.knex.client.database()}' AND
+          REFERENCED_TABLE_NAME = '${table}';
+      `,
       )
-      .then(res => res.rows) as Promise<[{ constraint_name: string }]>
+      .then(res => res) as Promise<[{ constraint_name: string }]>
   }
 
   _listColumns(table: string) {
@@ -95,8 +115,9 @@ class QueryWrapper {
   _attachRecordInfo(data: any, is_update = false) {
     const args = [
       this._transformDates(data),
-      !is_update && !data.created_date && { created_date: new Date().toISOString() },
-      { updated_date: new Date().toISOString() },
+      !is_update && !data.id && { id: uuid() },
+      // !is_update && !data.created_date && { created_date: new Date() },
+      // { updated_date: new Date() },
     ].filter(Boolean)
     return Object.assign({}, ...args)
   }
@@ -117,10 +138,11 @@ class QueryWrapper {
       ...this.config,
       pool: { min: 0, max: 1 },
     })
-    set(temp_config, 'connection.database', 'postgres')
+    set(temp_config, 'connection.database', null)
     const temp_knex = knex(temp_config)
     await temp_knex.raw(action.toLowerCase()).catch(err => {
-      false
+      console.error('err: ', err)
+      return false
     })
     temp_knex.destroy()
     return true
@@ -130,14 +152,16 @@ class QueryWrapper {
     return this.knex.transaction(trx => query.then(trx.commit).catch(trx.rollback))
   }
 
-  async listViews() {
+  async listViews(database: string) {
     const exists = await this._checkDatabase()
     if (!exists) {
       return Promise.resolve([])
     }
     return this.knex
-      .raw(`select table_name as name from INFORMATION_SCHEMA.views WHERE table_schema = ANY (current_schemas(false))`)
-      .then(res => res.rows) as Promise<[{ name: string }]>
+      .raw(
+        `SELECT TABLE_NAME as name FROM information_schema.\`TABLES\` WHERE TABLE_TYPE LIKE 'VIEW' AND TABLE_SCHEMA LIKE '${database}';`,
+      )
+      .then(res => res[0]) as Promise<[{ name: string }]>
   }
 
   async createDatabase(database: string) {
@@ -147,13 +171,13 @@ class QueryWrapper {
   createTable(table: string) {
     return this.knex.schema.createTable(table, t => {
       t.uuid('id')
-        .defaultTo(this.knex.raw('uuid_generate_v4()'))
+        // .defaultTo(this.knex.raw('(UUID())'))
         .primary()
       t.string('status')
         .defaultTo('Active')
         .notNullable()
-      t.timestamp('created_date', { precision: 6, useTz: true }).defaultTo(this.knex.fn.now())
-      t.timestamp('updated_date', { precision: 6, useTz: true }).defaultTo(this.knex.fn.now())
+      t.timestamp('created_date', { precision: 6, useTz: true }).defaultTo(this.knex.raw('CURRENT_TIMESTAMP(6)'))
+      t.timestamp('updated_date', { precision: 6, useTz: true }).defaultTo(this.knex.raw('CURRENT_TIMESTAMP(6)'))
     })
   }
 
@@ -347,7 +371,7 @@ class QueryWrapper {
     return this.knex(table)
       .returning(columns)
       .insert<T>(data)
-      .then((response: any) => response[0])
+      .then(() => data) as Promise<T>
   }
 
   async upsert<T extends Identifiable = any>(table: string, data: MaybeArray<T>, fields: string[] = []) {
@@ -419,7 +443,7 @@ class QueryWrapper {
     return query
       .returning('id')
       .delete()
-      .then((res: any) => (Array.isArray(id) ? res : res[0]))
+      .then(() => id)
   }
 
   deleteByFilter(table: string, filter: object | QueryCallback = {}) {

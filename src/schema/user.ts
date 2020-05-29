@@ -6,52 +6,10 @@ const USER_TABLE: Table = {
   list_roles: ADMIN_ROLES,
   columns: [
     {
-      column_name: 'name',
+      column_name: 'username',
       type: 'string',
       required: true,
       unique: true,
-    },
-    {
-      column_name: 'email',
-      type: 'string',
-      required: true,
-      index: true,
-    },
-    {
-      column_name: 'verified',
-      type: 'boolean',
-      default: false,
-    },
-    {
-      column_name: 'first_name',
-      type: 'string',
-      // required: true,
-      default: '',
-    },
-    {
-      column_name: 'last_name',
-      type: 'string',
-      // required: true,
-      default: '',
-    },
-    {
-      column_name: 'role',
-      type: 'string',
-      required: true,
-      default: '',
-      enum: ['Admin'],
-    },
-    {
-      column_name: 'last_login_date',
-      type: 'timestamp',
-      type_params: [{ useTz: true }],
-      is_read_only: true,
-    },
-    {
-      column_name: 'old_user_id',
-      type: 'integer',
-      default: 0,
-      // required: true,
     },
   ],
 }

@@ -7,7 +7,7 @@ import { InitializerContext } from 'types'
 
 export default async ({ server }: { server: Server }) => {
   const dir = path.join(__dirname, './initializers')
-  const context: InitializerContext = { server, logger }
+  const context: InitializerContext = { server, logger, io: null, api_docs: null }
   return fs
     .readdirAsync(dir)
     .then((files: string[]) => files.sort())

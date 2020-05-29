@@ -7,7 +7,7 @@ Rest API server for template.
 This project requires the following in your system
 
 - Node.js 10.x or higher
-- PostGreSQL
+- MYSQL
 
 ## Installing
 
@@ -24,11 +24,11 @@ Setup environment variables on development/test/production. Configuration files 
 ```
 BASIC_PASSWORD=
 BASIC_USERNAME=
-DB_CLIENT=pg
+DB_CLIENT=mysql2
 DB_HOST=
 DB_NAME=
 DB_PASSWORD=
-DB_PORT=5432
+DB_PORT=3306
 DB_USER=
 AUTH_SECRET=F0nch3rt0
 TOKEN_EXPIRY_DAYS=365
