@@ -79,10 +79,7 @@ export interface ServiceLocator {
     DB: QueryWrapper
     knex: Knex
     logger: Logger
-    sendgrid: typeof MailService
     Model?: ModelService
-    s3: S3Client
-    azure: BlobService
     io?: SocketIO.Server
   }
   registerService(name: string, service: object): void

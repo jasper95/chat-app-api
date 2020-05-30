@@ -14,12 +14,6 @@ const serviceLocator: ServiceLocator = {
     DB,
     knex: DB.knex,
     logger,
-    sendgrid,
-    s3: new S3Client({
-      accessKeyId: process.env.AWS_ACCESS_KEY,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    }),
-    azure: azure.createBlobService(process.env.AZURE_STORE_CONNECTION),
   },
   registerService(service_name: string, service: object) {
     if (!this.services[service_name]) {
