@@ -170,14 +170,12 @@ class QueryWrapper {
 
   createTable(table: string) {
     return this.knex.schema.createTable(table, t => {
-      t.uuid('id')
-        // .defaultTo(this.knex.raw('(UUID())'))
-        .primary()
+      t.uuid('id').primary()
       t.string('status')
         .defaultTo('Active')
         .notNullable()
-      t.timestamp('created_date').defaultTo(this.knex.raw('CURRENT_TIMESTAMP'))
-      t.timestamp('updated_date').defaultTo(this.knex.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
+      t.timestamp('created_date', { useTz: true }).defaultTo(this.knex.fn.now())
+      // t.timestamp('updated_date', { useTz: true }).defaultTo(this.knex.fn.now())
     })
   }
 
