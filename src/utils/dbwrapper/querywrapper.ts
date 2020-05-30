@@ -176,12 +176,8 @@ class QueryWrapper {
       t.string('status')
         .defaultTo('Active')
         .notNullable()
-      t.dateTime('created_at')
-        .notNullable()
-        .defaultTo(this.knex.raw('CURRENT_TIMESTAMP'))
-      t.dateTime('updated_at')
-        .notNullable()
-        .defaultTo(this.knex.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
+      t.timestamp('created_date').defaultTo(this.knex.raw('CURRENT_TIMESTAMP'))
+      t.timestamp('updated_date').defaultTo(this.knex.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
     })
   }
 
