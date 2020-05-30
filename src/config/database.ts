@@ -8,6 +8,11 @@ export default {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     port: Number(process.env.DB_PORT),
-    ssl: process.env.NODE_ENV === 'production',
+    ssl:
+      process.env.NODE_ENV === 'production'
+        ? {
+            rejectUnauthorized: false,
+          }
+        : undefined,
   },
 } as DBConfig
