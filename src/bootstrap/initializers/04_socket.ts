@@ -26,26 +26,13 @@ export default function initializeSocket({ server }: InitializerContext) {
     socket.broadcast.emit('userJoined', {
       username: socket.username,
     })
-    socket.on('newMessage', async data => {
+    socket.on('newMessage', async (data, cb) => {
       const response = await DB.insert('message', data)
       io.emit('newMessage', {
         ...response,
         sender: socket.username,
       })
-    })
-
-    // when the client emits 'typing', we broadcast it to others
-    socket.on('typing', () => {
-      socket.broadcast.emit('typing', {
-        username: socket.username,
-      })
-    })
-
-    // when the client emits 'stop typing', we broadcast it to others
-    socket.on('stop typing', () => {
-      socket.broadcast.emit('stop typing', {
-        username: socket.username,
-      })
+      cb()
     })
   })
 
