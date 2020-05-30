@@ -12,6 +12,7 @@ import { LoginSchema, ForgotPasswordSchema } from 'types'
 import { isAfter } from 'date-fns'
 import bcrypt from 'bcrypt'
 import dayjs from 'dayjs'
+import serviceLocator from 'utils/serviceLocator'
 
 @Controller('/auth', 'Authentication')
 export default class UserController extends AppService {
@@ -150,9 +151,13 @@ export default class UserController extends AppService {
   }
 
   @Post('/logout', { summary: 'Logout current session' })
-  async logout({ session }: Request, res: Response) {
+  async logout({ session, user }: Request, res: Response) {
     const response = await this.DB.deleteById('auth_session', session.id)
     res.clearCookie('access_token', { path: '/' })
+    const io = serviceLocator.get('io')
+    io.emit('logout', {
+      sender: user.username,
+    })
     return response
   }
 }

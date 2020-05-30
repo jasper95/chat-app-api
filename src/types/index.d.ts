@@ -83,7 +83,7 @@ export interface ServiceLocator {
     Model?: ModelService
     s3: S3Client
     azure: BlobService
-    io?: SocketIO
+    io?: SocketIO.Server
   }
   registerService(name: string, service: object): void
   get(name: 'DB'): QueryWrapper
@@ -93,7 +93,7 @@ export interface ServiceLocator {
   get(name: 'logger'): Logger
   get(name: 'Model'): ModelService
   get(name: 's3'): S3Client
-  get(name: 'io'): SocketIO
+  get(name: 'io'): SocketIO.Server
 }
 
 export interface ModelService {

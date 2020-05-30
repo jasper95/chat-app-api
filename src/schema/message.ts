@@ -7,9 +7,8 @@ const MESSAGE_TABLE: Table = {
   columns: [
     {
       column_name: 'text',
-      type: 'string',
+      type: 'text',
       required: true,
-      unique: true,
     },
     {
       column_name: 'user_id',

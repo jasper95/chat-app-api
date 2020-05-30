@@ -28,7 +28,7 @@ export default function initializeSocket({ server }: InitializerContext) {
     })
     socket.on('newMessage', async data => {
       const response = await DB.insert('message', data)
-      socket.emit('newMessage', {
+      io.emit('newMessage', {
         ...response,
         sender: socket.username,
       })
@@ -47,13 +47,7 @@ export default function initializeSocket({ server }: InitializerContext) {
         username: socket.username,
       })
     })
-
-    // when the user disconnects.. perform this
-    socket.on('disconnect', () => {
-      // if (addedUser) {
-      //   --numUsers
-      //   // echo globally that this client has left
-      // }
-    })
   })
+
+  serviceLocator.registerService('io', io)
 }
