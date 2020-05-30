@@ -176,8 +176,12 @@ class QueryWrapper {
       t.string('status')
         .defaultTo('Active')
         .notNullable()
-      t.timestamp('created_date', { precision: 6, useTz: true }).defaultTo(this.knex.raw('CURRENT_TIMESTAMP(6)'))
-      t.timestamp('updated_date', { precision: 6, useTz: true }).defaultTo(this.knex.raw('CURRENT_TIMESTAMP(6)'))
+      t.timestamp('created_date', { precision: 6, useTz: true })
+        .notNullable()
+        .defaultTo(this.knex.raw('CURRENT_TIMESTAMP'))
+      t.timestamp('updated_date', { precision: 6, useTz: true })
+        .notNullable()
+        .defaultTo(this.knex.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
     })
   }
 
