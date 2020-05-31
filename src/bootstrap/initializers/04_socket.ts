@@ -17,6 +17,7 @@ export default function initializeSocket({ server }: InitializerContext) {
     })
     socket.on('newMessage', async (data, cb) => {
       const response = await DB.insert('message', data)
+      socket.broadcast.emit('stopTyping', { username: socket.username, id: socket.user_id })
       io.emit('newMessage', {
         ...response,
         sender: socket.username,
