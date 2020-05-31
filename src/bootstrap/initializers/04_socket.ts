@@ -1,14 +1,17 @@
 import socketIo from 'socket.io'
-import { InitializerContext, AuthSession } from 'types'
+import { InitializerContext } from 'types'
 import serviceLocator from 'utils/serviceLocator'
-import jwt from 'jsonwebtoken'
-import cookie from 'cookie'
 
 type Socket = socketIo.Socket & { user_id: string; username: string }
 export default function initializeSocket({ server }: InitializerContext) {
-  const logger = serviceLocator.get('logger')
   const io = socketIo.listen(server.server)
   const DB = serviceLocator.get('DB')
+  io.use((socket: Socket, next) => {
+    if (!socket.user_id) {
+      throw new Error('Unauthorized')
+    }
+    next()
+  })
 
   io.on('connection', (socket: Socket) => {
     socket.on('joinUser', (data: { username: string; user_id: string }) => {
