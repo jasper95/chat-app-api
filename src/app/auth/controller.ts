@@ -83,8 +83,8 @@ export default class UserController extends AppService {
     const token = await this.Model.auth.authenticateUser(user)
     // await this.DB.updateById('user', { id: user.id, last_login_date: new Date().toISOString() })
     res.setCookie('access_token', token, {
-      // httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      // secure: process.env.NODE_ENV === 'production',
       maxAge: 60 * 60 * 24 * 7,
       path: '/',
       sameSite: true,
