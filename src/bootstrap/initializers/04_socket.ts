@@ -34,6 +34,14 @@ export default function initializeSocket({ server }: InitializerContext) {
       })
       cb()
     })
+
+    socket.on('typing', () => {
+      socket.broadcast.emit('typing', { username: socket.username, id: socket.user_id })
+    })
+
+    socket.on('stopTyping', () => {
+      socket.broadcast.emit('stopTyping', { username: socket.username, id: socket.user_id })
+    })
   })
 
   serviceLocator.registerService('io', io)
