@@ -6,11 +6,13 @@ import cookie from 'cookie'
 
 type Socket = socketIo.Socket & { user_id: string; username: string }
 export default function initializeSocket({ server }: InitializerContext) {
+  const logger = serviceLocator.get('logger')
   const io = socketIo.listen(server.server)
   const DB = serviceLocator.get('DB')
 
   io.use((socket: Socket, next) => {
     const { cookie: cookie_header } = socket.request.headers
+    logger.info('Cookie: [%s]', util.inspect(cookie))
     if (cookie_header) {
       const { access_token } = cookie.parse(cookie_header)
       if (access_token) {
